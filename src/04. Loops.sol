@@ -28,3 +28,19 @@ contract Loops {
         } while (i < 10);
     }
 }
+
+contract LoopsOptimized {
+
+    function loopFor() public pure {
+        uint256 sum = 21 * 20 / 2; // sum of a row Gauss formula
+    }
+
+    function loopWhile() public pure {
+        uint256 sum = 11 * 5;
+    }
+
+
+    function loopDoWhile() public pure {
+        uint256 sum = 11 * 5;
+    }
+}

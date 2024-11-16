@@ -17,3 +17,15 @@ contract ArrayTypeTest is Test {
         array.initArray();
     }
 }
+
+contract ArrayTypeTestOptimized is Test {
+    ArrayTypeOptimized array;
+
+    function setUp() public {
+        array = new ArrayTypeOptimized();
+    }
+
+    function test_init() public {
+        array.initArray();
+    }
+}

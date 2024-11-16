@@ -17,3 +17,16 @@ contract ArrayLengthsTest is Test {
         arrayLength.callFor();
     }
 }
+
+contract ArrayLengthsOptimizedTest is Test {
+    ArrayLengthOptimized arrayLength;
+
+    function setUp() public {
+        arrayLength = new ArrayLengthOptimized();
+    }
+
+    function test_Call() public view {
+        arrayLength.callFor();
+    }
+}
+

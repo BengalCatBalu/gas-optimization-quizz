@@ -7,7 +7,24 @@ contract Errors {
     error Unauthorized(address);
 
     modifier onlyOwner() {
-        require(owner == msg.sender, "Error: You are not a owner!");
+        require(msg.sender == owner, "Error: You are not a owner!");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function call() public view onlyOwner {}
+}
+
+contract ErrorsOptimized {
+    address owner;
+
+    error Unauthorized(address);
+
+    modifier onlyOwner() {
+        if (owner != msg.sender) revert Unauthorized(msg.sender);
         _;
     }
 

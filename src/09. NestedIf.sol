@@ -10,3 +10,9 @@ contract NestedIf {
         return false;
     }
 }
+
+contract NestedIfOptimized {
+    function call(uint256 number) public pure returns (bool) {
+        return (number > 0 && number < 100 && number != 50);
+    }
+}

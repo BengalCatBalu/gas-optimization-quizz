@@ -2,8 +2,8 @@
 pragma solidity ^0.8.25;
 
 import "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
 import "src/01. ArithmeticOperators.sol";
-
 // forge test --match-contract ArithmeticOperators
 // forge test --match-contract ArithmeticOperators --gas-report
 contract ArithmeticOperatorsTest is Test {
@@ -33,3 +33,34 @@ contract ArithmeticOperatorsTest is Test {
         division.divisionBy128(1024);
     }
 }
+
+contract ArithmeticOperatorsOptimizedTest is Test {
+    AdditionOptimized addition;
+    SubtractionOptimized subtraction;
+    DivisionOptimized division;
+
+    function setUp() public {
+        // addition = new Addition();
+        addition = new AdditionOptimized();
+        subtraction = new SubtractionOptimized();
+        division = new DivisionOptimized();
+    }
+
+    function test_Addition() public {
+         addition.addition(10);
+    }
+
+    function test_Subtraction() public {
+        subtraction.subtraction(10);
+    }
+
+    function test_DivisionBy2() public view {
+        console.log("Div 2 512", division.divisionBy2(1024));
+    }
+
+    function test_DivisionBy128() public view {
+        console.log("Div 128 8", division.divisionBy128(1024));
+    }
+}
+
+

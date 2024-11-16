@@ -25,3 +25,23 @@ contract LoopsTest is Test {
         loops.loopDoWhile();
     }
 }
+
+contract LoopsOptimizedTest is Test {
+    LoopsOptimized loops;
+
+    function setUp() public {
+        loops = new LoopsOptimized();
+    }
+
+    function test_for() public view {
+        loops.loopFor();
+    }
+
+    function test_while() public view {
+        loops.loopWhile();
+    }
+
+    function test_doWhile() public view {
+        loops.loopDoWhile();
+    }
+}

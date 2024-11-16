@@ -20,3 +20,18 @@ contract ErrorsTest is Test {
         vm.stopPrank();
     }
 }
+
+contract ErrorsTestOptimized is Test {
+    ErrorsOptimized errors;
+
+    function setUp() public {
+        errors = new ErrorsOptimized();
+    }
+
+    function test_call() public {
+        vm.startPrank(address(0x01));
+        vm.expectRevert();
+        errors.call();
+        vm.stopPrank();
+    }
+}

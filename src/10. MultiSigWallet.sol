@@ -141,3 +141,128 @@ contract MultiSigWallet {
         return confirmationsTrimmed;
     }
 }
+
+
+contract MultiSigWalletOptimized {
+    mapping(address => bool) public owners;
+    uint256 public required;
+
+    struct Transaction {
+        uint256 transactionID;
+        uint256 value;
+        uint256 confirmationCount;
+        uint256 executionTimestamp;
+        address destination;
+        bool executed;
+    }
+
+    Transaction[] public transactions;
+    mapping(uint256 => address[]) public confirmations;
+
+    event Deposit(address indexed sender, uint256 value);
+    event Submission(uint256 indexed transactionId);
+    event Confirmation(address indexed owner, uint256 indexed transactionId);
+    event Execution(uint256 indexed transactionId);
+    event ExecutionFailure(uint256 indexed transactionId);
+    error Unauthorized(address);
+
+    modifier onlyOwner() {
+        require(owners[msg.sender], "Not owner");
+        _;
+    }
+
+    modifier transactionExists(uint256 transactionId) {
+        require(transactionId < transactions.length, "Transaction does not exist");
+        _;
+    }
+
+    modifier notConfirmed(uint256 transactionId) {
+        for (uint i = 0; i < confirmations[transactionId].length;) {
+            if (confirmations[transactionId][i] == msg.sender) {
+                revert("Confirmed");
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        _;
+    }
+
+    modifier notExecuted(uint256 transactionId) {
+        require(!transactions[transactionId].executed, "Transaction already executed");
+        _;
+    }
+
+    constructor(address[] memory _owners, uint256 _required) {
+        require(_owners.length > 0, "Owners required");
+        require(_required > 0 && _required <= _owners.length, "Invalid number of required confirmations");
+
+        for (uint256 i = 0; i < _owners.length; i++) {
+            owners[_owners[i]] = true;
+        }
+
+        required = _required;
+    }
+
+    receive() external payable {
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    function submitTransaction(address destination, uint256 value) public onlyOwner {
+        transactions.push(
+            Transaction({
+                transactionID: transactions.length,
+                value: value,
+                confirmationCount: 0,
+                executionTimestamp: 0,
+                destination: destination,
+                executed: false
+            })
+        );
+
+        emit Submission(transactions.length);
+    }
+
+    function confirmTransaction(uint256 transactionId)
+        public
+        onlyOwner
+        transactionExists(transactionId)
+        notConfirmed(transactionId)
+    {
+        confirmations[transactionId].push(msg.sender);
+        transactions[transactionId].confirmationCount += 1;
+
+        emit Confirmation(msg.sender, transactionId);
+
+        if (transactions[transactionId].confirmationCount >= required) {
+            executeTransaction(transactionId);
+        }
+    }
+
+    function executeTransaction(uint256 transactionId)
+        public
+        onlyOwner
+        transactionExists(transactionId)
+        notExecuted(transactionId)
+    {
+        if (transactions[transactionId].confirmationCount >= required) {
+            transactions[transactionId].executed = true;
+
+            (bool success,) = transactions[transactionId].destination.call{value: transactions[transactionId].value}("");
+            if (success) {
+                emit Execution(transactionId);
+            } else {
+                transactions[transactionId].executed = false;
+                emit ExecutionFailure(transactionId);
+            }
+        }
+    }
+
+    function getTransactionCount() public view returns (uint256) {
+        return transactions.length;
+    }
+
+    function getConfirmations(uint256 transactionId) public view returns (address[] memory) {
+        return confirmations[transactionId];
+    }
+}
